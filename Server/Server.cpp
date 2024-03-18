@@ -3,7 +3,7 @@
 #include "Logging/Logger.h"
 #include <algorithm>
 
-using namespace std; // Add this line to bring the entire std namespace into scope for this source file
+using namespace std; 
 
 void Server::submitOrder(const Order& order) {
     if (RiskManager::checkRisk(order)) {
