@@ -8,6 +8,7 @@
 
 #include <iostream>
 
+using namespace std; 
 int main() {
     // Create an instrument
     Instrument instrument("AAPL", "Apple Inc.", "NASDAQ", 0.01, 100);
