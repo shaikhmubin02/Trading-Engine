@@ -1,55 +1,110 @@
-#include "Instrument/Instrument.h"
-#include "Logging/Logger.h"
-#include "OrderBook/OrderBook.h"
-#include "Orders/Order.h"
-// #include "RiskManagement/RiskManager.h"
-#include "Server/Server.h"
-// #include "Client/Client.h"
-
+// #include <bits/stdc++.h>
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <limits>
+#include <string> 
+#include <vector> 
+#include <numeric>
 #include <iostream>
+#include <algorithm>
+#include <unordered_map>
+#include <memory> 
+#include <variant>
+#include <optional> 
+#include <tuple>
+#include <format> 
 
-using namespace std; 
-int main() {
-    // Create an instrument
-    Instrument instrument("AAPL", "Apple Inc.", "NASDAQ", 0.01, 100);
+enum class OrderType {
 
-    // Create a server
-    Server server;
+    GoodTillCancel,
+    FillAndKill
 
-    // Create client orders
-    Order buyOrder1 = Client::createOrder("123456", instrument, "BUY", 150.0, 100, "trader1");
-    Order buyOrder2 = Client::createOrder("123457", instrument, "BUY", 151.0, 200, "trader2");
-    Order sellOrder = Client::createOrder("789012", instrument, "SELL", 151.0, 150, "trader3");
+};
 
-    // Submit orders to the server
-    server.submitOrder(buyOrder1);
-    server.submitOrder(buyOrder2);
-    server.submitOrder(sellOrder);
+enum class Side {
+    Buy,
+    Sell
+};
 
-    // Match orders
-    server.matchOrders();
+using Price = std::int32_t;
+using Quantity = std::uint32_t;
+using OrderId = std::uint64_t;
 
-    // Print order book
-    server.printOrderBook();
+struct LevelInfo {
 
-    // Update instrument price and volume
-    instrument.updatePrice(151.0);
-    instrument.updateVolume(150);
+    Price price_;
+    Quantity quantity_;
+};
 
-    // Print updated instrument details
-    instrument.printDetails();
+using LevelInfos = std::vector<LevelInfo>;
 
-    // Cancel an order
-    server.cancelOrder("123456");
+class OrderbookLevelInfos {
 
-    // Match orders again
-    server.matchOrders();
+    public:
+        OrderbookLevelInfos(const LevelInfos& bids, const LevelInfos& asks) 
+            : bids_{ bids }
+            , asks_ { asks } 
+        { }
 
-    // Print order book after cancellation
-    server.printOrderBook();
+        const LevelInfos& GetBids() const { return bids_; } 
+        const LevelInfos& GetAsks() const { return asks_: }
 
-    // Logging example
-    Logger::log(Logger::INFO, "Trading session ended.");
+    private:
+
+        LevelInfos bids_;
+        LevelInfos asks_;
+};        
+
+class Order {
+
+    public: 
+        Order(OrderType orderType, OrderId orderId, Side side, Price price, Quantity quantity) 
+            : orderType_ { orderType }
+            , orderId_ { orderId } 
+            , side_ { side }
+            , price_ { price }
+            , initialQuantity_ { quantity }
+            , remainingQuantity_ { quantity }
+        { }
+
+        OrderId GetOrderId() const { return orderId_; } 
+        Side GetSide() const { return side_; } 
+        Price GetPrice() const { return price_; }
+        OrderType GetOrderType() const { return orderType_; }
+        Quantity GetInitialQuantity()  const { return initialQuantity_; }
+        Quantity GetRemainingQuantity() const { return remainingQuantity_; }
+        Quantity GetFilledQuantity() const { return GetInitialQuantity() - GetRemainingQuantity(); } 
+
+        void Fill(Quantity quantity) {
+            if(quantity > GetRemainingQuantity()) {
+                throw std::logic_error(std::format("Order ({}) cannot be filled for more than its remaining quantity.", GetOrderId()));
+            } 
+
+            remainingQuantity_ -= quantity; 
+        }
+    private: 
+        OrderType orderType_; 
+        OrderId orderId;
+        Side side_; 
+        Price price_; 
+        Quantity initialQuantity_; 
+        Quantity remainingQuantity_; 
+};
+
+
+
+
+
+
+
+int main () {
 
     return 0;
 }
+
