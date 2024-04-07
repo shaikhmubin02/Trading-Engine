@@ -20,16 +20,15 @@
 #include <tuple>
 #include <format> 
 
-enum class OrderType
+enum class OrderType 
 {
-	GoodTillCancel,
-	FillAndKill,
-	FillOrKill,
-	GoodForDay,
-	Market,
+
+    GoodTillCancel,
+    FillAndKill
+
 };
 
-enum class Side
+enum class Side 
 {
     Buy,
     Sell
@@ -39,121 +38,130 @@ using Price = std::int32_t;
 using Quantity = std::uint32_t;
 using OrderId = std::uint64_t;
 
-struct LevelInfo
+struct LevelInfo 
 {
+
     Price price_;
     Quantity quantity_;
 };
 
 using LevelInfos = std::vector<LevelInfo>;
 
-class OrderbookLevelInfos
+class OrderbookLevelInfos 
 {
-public:
-    OrderbookLevelInfos(const LevelInfos& bids, const LevelInfos& asks)
-        : bids_{ bids }
-        , asks_{ asks }
-    { }
 
-    const LevelInfos& GetBids() const { return bids_; }
-    const LevelInfos& GetAsks() const { return asks_; }
+    public:
+        OrderbookLevelInfos(const LevelInfos& bids, const LevelInfos& asks) 
+            : bids_{ bids }
+            , asks_ { asks } 
+        { }
 
-private:
-    LevelInfos bids_;
-    LevelInfos asks_;
-};      
+        const LevelInfos& GetBids() const { return bids_; } 
+        const LevelInfos& GetAsks() const { return asks_: }
 
-class Order
+    private:
+
+        LevelInfos bids_;
+        LevelInfos asks_;
+};        
+
+class Order 
 {
-public:
-    Order(OrderType orderType, OrderId orderId, Side side, Price price, Quantity quantity)
-        : orderType_{ orderType }
-        , orderId_{ orderId }
-        , side_{ side }
-        , price_{ price }
-        , initialQuantity_{ quantity }
-        , remainingQuantity_{ quantity }
-    { }
 
-    OrderId GetOrderId() const { return orderId_; }
-    Side GetSide() const { return side_; }
-    Price GetPrice() const { return price_; }
-    OrderType GetOrderType() const { return orderType_; }
-    Quantity GetInitialQuantity() const { return initialQuantity_; }
-    Quantity GetRemainingQuantity() const { return remainingQuantity_; }
-    Quantity GetFilledQuantity() const { return GetInitialQuantity() - GetRemainingQuantity(); }
-    bool IsFilled() const { return GetRemainingQuantity() == 0; }
-    void Fill(Quantity quantity)
-    {
-        if (quantity > GetRemainingQuantity())
-            throw std::logic_error(std::format("Order ({}) cannot be filled for more than its remaining quantity.", std::to_string(GetOrderId())));
+    public: 
+        Order(OrderType orderType, OrderId orderId, Side side, Price price, Quantity quantity) 
+            : orderType_ { orderType }
+            , orderId_ { orderId } 
+            , side_ { side }
+            , price_ { price }
+            , initialQuantity_ { quantity }
+            , remainingQuantity_ { quantity }
+        { }
 
-        remainingQuantity_ -= quantity;
-    }
+        OrderId GetOrderId() const { return orderId_; } 
+        Side GetSide() const { return side_; } 
+        Price GetPrice() const { return price_; }
+        OrderType GetOrderType() const { return orderType_; }
+        Quantity GetInitialQuantity()  const { return initialQuantity_; }
+        Quantity GetRemainingQuantity() const { return remainingQuantity_; }
+        Quantity GetFilledQuantity() const { return GetInitialQuantity() - GetRemainingQuantity(); }
+        bool IsFilled() const { return GetRemainingQuantity()==0; } 
 
-private:
-    OrderType orderType_;
-    OrderId orderId_;
-    Side side_;
-    Price price_;
-    Quantity initialQuantity_;
-    Quantity remainingQuantity_;
+        void Fill(Quantity quantity) 
+        {
+            if(quantity > GetRemainingQuantity()) 
+            {
+                throw std::logic_error(std::format("Order ({}) cannot be filled for more than its remaining quantity.", GetOrderId()));
+            } 
+
+            remainingQuantity_ -= quantity; 
+        }
+    private: 
+        OrderType orderType_; 
+        OrderId orderId;
+        Side side_; 
+        Price price_; 
+        Quantity initialQuantity_; 
+        Quantity remainingQuantity_; 
 };
 
 using OrderPointer = std::shared_ptr<Order>;
 using OrderPointers = std::list<OrderPointer>;
  
-class OrderModify
+class OrderModify 
 {
-public:
-    OrderModify(OrderId orderId, Side side, Price price, Quantity quantity)
-        : orderId_{ orderId }
-        , price_{ price }
-        , side_{ side }
-        , quantity_{ quantity }
-    { }
 
-    OrderId GetOrderId() const { return orderId_; }
-    Price GetPrice() const { return price_; }
-    Side GetSide() const { return side_; }
-    Quantity GetQuantity() const { return quantity_; }
+    public: 
+        OrderModify(OrderId orderId, Side side, Price price, Quantity quantity ) 
+            : orderId_ { orderId }
+            , price_ { price }
+            , side_ { side }
+            , quantity_ { quantity }
+        { }
 
-    OrderPointer ToOrderPointer(OrderType type) const
-    {
-        return std::make_shared<Order>(type, GetOrderId(), GetSide(), GetPrice(), GetQuantity());
-    }
+        OrderId GetOrderId() const { return orderId_; } 
+        Price GetPrice() const { return price_; } 
+        Side GetSide() const { return side_; }
+        Quantity GetQuantity() const { return quantity_; }
 
-private:
-    OrderId orderId_;
-    Price price_;
-    Side side_;
-    Quantity quantity_;
+        OrderPointer ToOrderPointer(OrderType type) const 
+        { 
+            return std::make_shared<Order>(type, GetOrderId(), GetSide(), GetPrice(), GetQuantity());
+        }    
+
+    private: 
+        OrderId orderId_;
+        Price price_; 
+        Side side_; 
+        Quantity quantity_; 
+
+}; 
+
+struct TradeInfo 
+{
+    OrderId orderId_; 
+    Price price_; 
+    Quantity quantity_; 
 };
 
-struct TradeInfo
-{
-    OrderId orderId_;
-    Price price_;
-    Quantity quantity_;
+class Trade 
+{ 
+
+public: 
+    Trade( const TradeInfo&  bidTrade, const TradeInfo& askTrade) 
+        : bidTrade_ { bidTrade }
+        , askTrade_ { askTrade }
+    { } 
+
+    const TradeInfo& GetBidTrade() const { return bidTrade_; } 
+    const TradeInfo& GetAskTrade() const { return askTrade_; } 
+
+private: 
+    TradeInfo bidTrade_; 
+    TradeInfo askTrade_; 
 };
 
-class Trade
-{
-public:
-    Trade(const TradeInfo& bidTrade, const TradeInfo& askTrade)
-        : bidTrade_{ bidTrade }
-        , askTrade_{ askTrade }
-    { }
-
-    const TradeInfo& GetBidTrade() const { return bidTrade_; }
-    const TradeInfo& GetAskTrade() const { return askTrade_; }
-
-private:
-    TradeInfo bidTrade_;
-    TradeInfo askTrade_;
-};
-
-using Trades = std::vector<Trade>;
+using Trades = std::vector<Trade>; 
 
 class Orderbook
 {
@@ -195,7 +203,7 @@ private:
 
         while(true) {
 
-            if(bids_.empty() || asks_.empty()) 
+            if(bids_.empty() || asks.empty()) 
                 break;
 
             auto& [bidPrice, bids] = *bids_.begin(); 
@@ -209,10 +217,10 @@ private:
                 auto& bid = bids.front();
                 auto& ask = asks.front(); 
 
-                Quantity quantity = std::min(bid->GetRemainingQuantity(), ask-> GetRemainingQuantity());
+                Quantity quantity = std::min(bid->GetRemainingQuantit(), ask-> GetRemainingQuantity());
 
                 bid-> Fill(quantity);
-                ask-> Fill(quantity);
+                aks-> Fill(quantity);
 
                 if (bid-> IsFilled())
                 {
@@ -220,7 +228,7 @@ private:
                     orders_.erase(bid-> GetOrderId());
                 }
 
-                if (ask-> IsFilled())
+                if (aks-> IsFilled())
                 {
                     asks.pop_front();
                     orders_.erase(ask-> GetOrderId());
@@ -322,7 +330,7 @@ public:
         
         const auto& [existingOrder, _] = orders_.at(order.GetOrderId()); 
         CancelOrder(order.GetOrderId());
-        return addOrder(order.ToOrderPointer(existingOrder-> GetOrderType()));
+        return addOrder(ordre.ToOrderPointer(existingOrder-> GetOrderType()));
     }
 
     std::size_t Size() const { return orders_.size(); }
@@ -335,13 +343,11 @@ public:
 
         auto CreateLevelInfo = [](Price price, const OrderPointers& orders) 
         {
-            return LevelInfo{ price, std::accumulate(orders.begin(), orders.end(), (Quantity)0,
-                [](Quantity runningSum, const OrderPointer& order) {
-                    return runningSum + order->GetRemainingQuantity();
-                }) };
+            return LevelInfo{ price, std::accumulate(orders.begin(), orders.end(), (Quantity)0, 
+                [](Quantity runningSum, const OrderPointers& order) 
+                { return runningSum + order-> GetRemainingQuantity(); }) };
         };
 
- 
         for (const auto& [price, orders] : bids_) 
             bidInfos.push_back(CreateLevelInfo(price, orders));
 

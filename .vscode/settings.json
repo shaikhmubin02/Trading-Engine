@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "xhash": "cpp",
+        "list": "cpp"
+    },
+    "C_Cpp.default.compilerPath": "C:\\LLVM\\bin\\clang++.exe"
+}
